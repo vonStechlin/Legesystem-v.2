@@ -445,7 +445,7 @@ public class Legesystem {
         }
       }
     }
-  }
+    
   // metode for aa skrive ut statistikk
   static void skrivUtStatistikk() throws Exception {
     Scanner in = new Scanner(System.in);
