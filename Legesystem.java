@@ -14,6 +14,7 @@ public class Legesystem {
       lesPasienter(fil);
       lesLegemidler(fil);
       lesLeger(fil);
+      lesResepter(fil);
     }
     catch (FileNotFoundException exception) {System.out.println(exception);}
 
@@ -333,6 +334,22 @@ public class Legesystem {
     }
   }
 
+  /**
+    Denne metoden sjekker om en et Lege-objekt med et gitt navn finnes i listen
+    over Lege-objekter, og returnerer i så fall dette.
+    @param legenavn legens navn
+    @return Lege-objekt med navn tilsvarende legenavn
+  */
+  private static Lege hentLegePaaNavn(String legenavn) {
+    for (Lege l : legeliste) {
+      if (l.hentNavn().equals(legenavn.trim())) {
+        return l;
+      }
+    }
+
+    return null;
+  }
+
   static void lesPasienter(File filobjekt) throws FileNotFoundException {
     Scanner in = new Scanner(filobjekt);
     try {
@@ -358,12 +375,12 @@ public class Legesystem {
   static void lesLegemidler(File filobjekt) throws FileNotFoundException {
     Scanner in = new Scanner(filobjekt);
     while (in.hasNextLine()) {
-      try{
-        String[] linje = in.nextLine().split(" ");
-        if (linje[0].equals("#")) {
-          if (linje[1].equals("Legemidler")) {
-            String[] nesteLinje = in.nextLine().split(",");
-            while (!(nesteLinje[0].charAt(0) == '#')) {
+      String[] linje = in.nextLine().split(" ");
+      if (linje[0].equals("#")) {
+        if (linje[1].equals("Legemidler")) {
+          String[] nesteLinje = in.nextLine().split(",");
+          while (!(nesteLinje[0].charAt(0) == '#')) {
+            try {
               Legemiddel legemiddel;
               String navn = nesteLinje[0].trim();
               double pris = Double.parseDouble(nesteLinje[2].trim());
@@ -385,15 +402,15 @@ public class Legesystem {
                   legemiddelliste.leggTil(legemiddel);
                 }
 
-                else { throw new IllegalArgumentException("Ugyldig dataformat! Kunne ikke lese linje " + nesteLinje); }
+                else {System.out.println("Ugyldig dataformat! Kunne ikke lese linje " + nesteLinje); }
               }
 
-              nesteLinje = in.nextLine().split(",");
+            } catch (IllegalArgumentException e) {
+              System.out.println("Ugyldig dataformat " + e.getMessage());
             }
+            nesteLinje = in.nextLine().split(",");
           }
         }
-      } catch (IllegalArgumentException e) {
-        System.out.println("Ugyldig dataformat! Legemiddel");
       }
     }
   }
@@ -429,15 +446,50 @@ public class Legesystem {
   static void lesResepter(File filobjekt) throws FileNotFoundException {
     Scanner in = new Scanner(filobjekt);
     while (in.hasNextLine()) {
-      String[] linje = in.nextLine().split(" ");
-      if (linje[1].equals("Resepter")) {
-        String[] nesteLinje = in.nextLine().split(",");
-        while (in.hasNextLine()) {
-          Legemiddel legemiddel = legemiddelliste.hent(Integer.parseInt(nesteLinje[0]));
-          Lege legeNavn; //hvordan skal vi finne lege bare vha legens navn?
-          nesteLinje = in.nextLine().split(",");
+      try {
+        String[] linje = in.nextLine().split(" ");
+        if (linje[1].equals("Resepter")) {
+          String[] nesteLinje = in.nextLine().split(",");
+          while (in.hasNextLine()) {
+            try {
+              Legemiddel legemiddel = legemiddelliste.hent(Integer.parseInt(nesteLinje[0]));
+              Lege lege = hentLegePaaNavn(nesteLinje[1]);
+              Pasient pasient = pasientliste.hent(Integer.parseInt(nesteLinje[2]));
+
+              if (nesteLinje[3].equals("p")) {
+                Resept presept = new PResept(legemiddel, lege, pasient);
+                reseptliste.leggTil(presept);
+              }
+              else {
+                int reit = Integer.parseInt(nesteLinje[4]);
+
+                if (nesteLinje[3].equals("blaa")) {
+                  Resept blaaResept = new BlaaResept(legemiddel, lege, pasient, reit);
+                  reseptliste.leggTil(blaaResept);
+                }
+
+                else if (nesteLinje[3].equals("hvit")) {
+                  Resept hvitResept = new HvitResept(legemiddel, lege, pasient, reit);
+                  reseptliste.leggTil(hvitResept);
+                }
+
+                else if (nesteLinje[3].equals("militaer")) {
+                  Resept militaerresept = new Militaerresept(legemiddel, lege, pasient, reit);
+                  reseptliste.leggTil(militaerresept);
+                }
+
+                else {
+                  System.out.println("Ugyldig verdi!");
+                }
+              }
+
+            } catch (UgyldigListeIndeks e) {
+              System.out.println( e.getMessage());
+            }
+            nesteLinje = in.nextLine().split(",");
+          }
         }
-      }
+      } catch (IndexOutOfBoundsException e) {}
     }
   }
 }
