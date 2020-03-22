@@ -43,7 +43,15 @@ public class Legesystem {
       String svar = in.next().trim();
       if (svar.equals("0")) skrivUtOversikt();
       else if (svar.equals("1")) leggTilLege();
-      else if (svar.equals("2")) leggTilPasient();
+      else if (svar.equals("2")) {
+        try {
+        leggTilPasient();
+        }
+        catch (IllegalArgumentException e) {
+          System.out.println("\nUgyldig input!\n");
+          Thread.sleep(1500);
+        }
+      }
       else if (svar.equals("3")) {
         try { leggTilResept(); }
         catch (Exception exception) {
@@ -216,12 +224,19 @@ public class Legesystem {
     }
   }
 
-  static void leggTilPasient() throws IllegalArgumentException {
+  static void leggTilPasient() throws Exception {
     Scanner in = new Scanner(System.in);
     System.out.println("Du har valg aa legge til ny pasient. Oppgi pasientens navn.");
     String navn = in.next();
     System.out.println("Oppgi pasientens foedselsnr.");
     String fnr = in.next();
+
+    char[] fnrArray = fnr.toCharArray();
+    for (char ch : fnrArray) {
+      if (!Character.isDigit(ch)) {
+        throw new IllegalArgumentException();
+      }
+    }
     // Her vil jeg gjerne ha en if-sjekk som sjekker at fnr kun bestaar av tall.
 
     Pasient nyPasient = new Pasient(navn, fnr);
