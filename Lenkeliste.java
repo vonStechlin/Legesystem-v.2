@@ -17,13 +17,13 @@ public class Lenkeliste<T> implements Liste<T>, Iterable<T> {
   public Iterator<T> iterator() {
     return new LenkelisteIterator();
   }
-
-  class LenkelisteIterator implements Iterator<T> {
+  // iteratoren
+  class LenkelisteIterator implements Iterator {
     private Node posisjon;
     private Node forrige;
     private boolean etterNext;
 
-
+    // settes til null når den foerst opprettes
     public LenkelisteIterator() {
       posisjon = null;
       forrige = null;
