@@ -1,10 +1,16 @@
-abstract class HviteResepter extends Resept{
-  public HviteResepter(Legemiddel dopRef, Lege legeRef, Pasient pasientRef, int reit){
-    super(dopRef, legeRef, pasientRef, reit);
+public class HvitResept extends Resept {
+
+  public HvitResept(Legemiddel l, Lege u, Pasient pasient, int r) {
+    super(l, u, pasient, r);
   }
-  String farge = "hvit";
-  // utfyller fargemetoden
-  public String farge(){
-    return farge;
+
+  public String farge() {
+    String str = "hvit";
+    return str;
+  }
+
+  @Override
+  public double prisAaBetale() { //bruker klassemetoden til superklassen for å hente legemiddelet, for saa aa bruke hentPris()-metoden til klassen Legemiddel for hente prisen.
+    return hentLegemiddel().hentPris();
   }
 }
