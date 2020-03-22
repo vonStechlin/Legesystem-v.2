@@ -2,12 +2,14 @@ import java.io.*;
 import java.util.*;
 import java.lang.*;
 
+// lager lenkelister til legesystemet
 public class Legesystem {
   static Lenkeliste<Legemiddel> legemiddelliste = new Lenkeliste<Legemiddel>();
   static SortertLenkeliste<Resept> reseptliste = new SortertLenkeliste<Resept>();
   static SortertLenkeliste<Lege> legeliste = new SortertLenkeliste<Lege>();
   static Lenkeliste<Pasient> pasientliste = new Lenkeliste<Pasient>();
 
+  // main metoden
   public static void main(String[] args) throws Exception {
     try {
       File fil = new File("myeInndata.txt");
@@ -18,6 +20,7 @@ public class Legesystem {
     }
     catch (FileNotFoundException exception) {System.out.println(exception);}
 
+    // starter opp menyen for legesystemet
     Scanner in = new Scanner(System.in);
     System.out.println("Starter legesystem.");
     System.out.print(".");
@@ -28,6 +31,8 @@ public class Legesystem {
     Thread.sleep(500);
     System.out.println();
     boolean avslutte = false;
+
+    // selve menyen tilbyr 8 ulike kommandoer og mulighet for aa avslutte
     while (!avslutte) {
       System.out.println("HOVEDMENY");
       System.out.println();
@@ -40,9 +45,17 @@ public class Legesystem {
       System.out.println("6: Skriv ut statistikk");
       System.out.println("7: Skriv data til fil");
       System.out.println("8: Avslutt program");
+
+      // hvert svaralternativ kaller paa metoder for tjenesten
       String svar = in.next().trim();
       if (svar.equals("0")) skrivUtOversikt();
-      else if (svar.equals("1")) leggTilLege();
+      else if (svar.equals("1")) try {
+        leggTilLege();
+      }
+      catch (NumberFormatException e) {
+        System.out.println("\nUgyldig input!\n");
+        Thread.sleep(1000);
+      }
       else if (svar.equals("2")) {
         try {
         leggTilPasient();
@@ -53,9 +66,16 @@ public class Legesystem {
         }
       }
       else if (svar.equals("3")) {
-        try { leggTilResept(); }
-        catch (Exception exception) {
-          System.out.println(exception + "\n");
+        try {
+          leggTilResept();
+        }
+        catch (UlovligUtskrift e) {
+          System.out.println("\n" + e + "\n");
+          Thread.sleep(1000);
+        }
+        catch (NumberFormatException e) {
+          System.out.println("\nUgyldig input!\n");
+          Thread.sleep(1000);
         }
       }
       else if (svar.equals("4")) {
@@ -88,6 +108,8 @@ public class Legesystem {
     Thread.sleep(2000);
   }
 
+
+  // lager metoder for aa skrive ut all info
   private static void skrivUtLeger() {
     int teller = 0;
     for (Lege l : legeliste) {
@@ -120,6 +142,8 @@ public class Legesystem {
     }
   }
 
+
+  // metode for aa skrive ut alle elementene
   static void skrivUtOversikt() {
     Scanner in = new Scanner(System.in);
     boolean avslutte = false;
@@ -157,43 +181,76 @@ public class Legesystem {
     }
   }
 
-  static void leggTilLege() {
+
+  // metode som registrerer en ny lege til systemet
+  static void leggTilLege() throws NumberFormatException {
     Scanner in = new Scanner(System.in);
     String navn;
+
     System.out.println("\nDu har valgt aa legge til en lege. Vennligst oppgi legens navn.");
     navn = in.nextLine();
-    Lege nyLege = new Lege(navn);
-    legeliste.leggTil(nyLege);
-    System.out.println("Legen " + nyLege.hentNavn() + " er lagt inn i systemet!\n");
+
+    System.out.println("\nEr " + navn + " en spesialist?");
+    System.out.println("0: Ja.");
+    System.out.println("1: Nei.");
+    String svar = in.next();
+    if (svar.equals("0")) {
+      System.out.println("Oppgi kontroll-IDen til " + navn + ":");
+      int kontrollid = Integer.parseInt(in.next());
+      Lege nyLege = new Spesialist(navn, kontrollid);
+      legeliste.leggTil(nyLege);
+      System.out.println("Spesialisten " + navn + " er lagt inn i systemet!\n");
+    }
+    else if (svar.equals("1")) {
+      Lege nyLege = new Lege(navn);
+      legeliste.leggTil(nyLege);
+      System.out.println("Legen " + navn + " er lagt inn i systemet!\n");
+    }
+    else {
+      throw new NumberFormatException(svar);
+    }
   }
 
   static void leggTilResept() throws UlovligUtskrift, NumberFormatException {
     Scanner in = new Scanner(System.in);
     int svar;
 
+
+    // bruker velger lege resepten registreres paa. Skriver ut nummerert liste med
+    // legene i systemet og ber bruker velge nr, dette svarer til legens plass i listen
     System.out.println("Hvilken lege skal skrive ut resept?");
     skrivUtLeger();
     svar = Integer.parseInt(in.next());
     Lege utskrivendeLege = legeliste.hent(svar);
 
+    // bruker velger hvilket legemiddel resepten er for
     System.out.println("For hvilket legemiddel skal resepten gjelde?");
     skrivUtLegemidler();
     svar = Integer.parseInt(in.next());
     Legemiddel legemiddel = legemiddelliste.hent(svar);
 
+    // bruker velger hvem resepten skal gjelde for
     System.out.println("For hvilken pasient skal resepten gjelde?");
     skrivUtPasienter();
     svar = Integer.parseInt(in.next());
     Pasient pasient = pasientliste.hent(svar);
 
+    // bare spesialister skal kunne skrive resepter paa narkotiske legemidler
+    if (legemiddel instanceof Narkotisk) {
+      if (!(utskrivendeLege instanceof Spesialist)) {
+        throw new UlovligUtskrift(utskrivendeLege, legemiddel, pasient.hentID());
+      }
+    }
+
     System.out.println("Tast 'b' for blaa resept. Tast 'h' for hvit resept.");
-    String input = in.next().trim(); //hvordan gjoere om til smaa bokstaver???
+    String input = in.next().trim().toLowerCase();
 
     if (input.equals("b")) {
       System.out.println("Hvor mange reit skal resepten ha?");
       int reit = Integer.parseInt(in.next());
       Resept resept = utskrivendeLege.skrivBlaaResept(legemiddel, pasient, reit);
       reseptliste.leggTil(resept);
+      System.out.println("\nResepten ble lagt til i listen!");
     }
     else if (input.equals("h")) {
       System.out.println("Tast 'v' for vanlig resept; tast 'm' for militaerresept" +
@@ -203,6 +260,7 @@ public class Legesystem {
       if (input.equals("p")) {
         Resept resept = utskrivendeLege.skrivPResept(legemiddel, pasient);
         reseptliste.leggTil(resept);
+        System.out.println("\nResepten ble lagt til i listen!");
       }
       else {
         System.out.println("Hvor mange reit skal resepten ha?");
@@ -211,11 +269,13 @@ public class Legesystem {
         if (input.equals("v")) {
           Resept resept = utskrivendeLege.skrivHvitResept(legemiddel, pasient, reit);
           reseptliste.leggTil(resept);
+          System.out.println("\nResepten ble lagt til i listen!");
         }
 
         if (input.equals("m")) {
           Resept resept = utskrivendeLege.skrivMilitaerResept(legemiddel, pasient, reit);
           reseptliste.leggTil(resept);
+          System.out.println("\nResepten ble lagt til i listen!");
         }
       }
     }
@@ -224,6 +284,7 @@ public class Legesystem {
     }
   }
 
+  // legger til pasient
   static void leggTilPasient() throws Exception {
     Scanner in = new Scanner(System.in);
     System.out.println("Du har valg aa legge til ny pasient. Oppgi pasientens navn.");
@@ -237,13 +298,13 @@ public class Legesystem {
         throw new IllegalArgumentException();
       }
     }
-    // Her vil jeg gjerne ha en if-sjekk som sjekker at fnr kun bestaar av tall.
 
     Pasient nyPasient = new Pasient(navn, fnr);
     pasientliste.leggTil(nyPasient);
     System.out.println("Pasienten " + nyPasient + " er lagt inn i systemet!");
   }
 
+  // legger til legemiddel
   static void leggTilLegemiddel() throws NumberFormatException {
     Scanner in = new Scanner(System.in);
 
@@ -277,6 +338,8 @@ public class Legesystem {
       Legemiddel narkotisk = new Narkotisk(navn, pris, virkestoff, styrkeN);
       legemiddelliste.leggTil(narkotisk);
     }
+
+    System.out.println("\nLegemiddelet ble lagt til i listen!\n");
   }
 
   static void brukResept() throws Exception {
@@ -320,19 +383,20 @@ public class Legesystem {
           }
         }
         if (!reseptFunnet) {
-          System.out.println("Resepten finnes ikke i pasientens reseptliste.");
+          System.out.println("\nResepten finnes ikke i pasientens reseptliste.\n");
           Thread.sleep(1000);
         }
       }
     }
   }
 
+  // metode for aa skrive ut statistikk
   static void skrivUtStatistikk() throws Exception {
     Scanner in = new Scanner(System.in);
     boolean avslutte = false;
 
     while (!avslutte) {
-      System.out.println();
+      System.out.println("\n ## STATISTIKK-MENY ## \n");
       System.out.println("0: Antall utskrevne resepter paa vanedannende legemidler.");
       System.out.println("1: Antall utskrevne resepter paa narkotiske legemidler.");
       System.out.println("2: Liste over leger som har skrevet ut resepter paa narktosike legemidler.");
@@ -341,6 +405,7 @@ public class Legesystem {
 
       String svar = in.next();
 
+      // skriver ut antall vanedannende resepter, finner dette ved aa gaa gjennom legelisten og kalle en hent-metode i legeklassen
       if (svar.equals("0")) {
         int sumVanedannende = 0;
 
@@ -351,6 +416,7 @@ public class Legesystem {
         System.out.println("Det er blitt skrevet ut " + sumVanedannende + " resept(er) paa vanedannnde legemidler.");
       }
 
+      // samme for narkotiske
       else if (svar.equals("1")) {
         int sumNarkotisk = 0;
 
@@ -362,6 +428,7 @@ public class Legesystem {
         System.out.println("Det er blitt skrevet ut " + sumNarkotisk + " resept(er) paa narkotiske legemidler.");
       }
 
+      // kaller en metode i legeklassen som returnerer true dersom legeobjektet har skrevet ut narkotisk-resept, printer deretter antall.
       else if (svar.equals("2")) {
         if (legeliste.stoerrelse() == 0) {
           System.out.println("Finner ingen leger med utskrevne resepter paa narkotiske legemidler.");
@@ -373,6 +440,7 @@ public class Legesystem {
         }
       }
 
+      // samme tankegang her, bare for pasienter
       else if (svar.equals("3")) {
         if (pasientliste.stoerrelse() == 0) {
           System.out.println("Finner ingen pasienter med gyldige resepter paa narkotiske legemidler.");
