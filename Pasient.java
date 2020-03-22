@@ -21,36 +21,8 @@ public class Pasient {
     return unikID;
   }
 
-  /**
-    Denne metoden er heller tvilsom. Finner vi en bedre loesning?
-  */
-  public void leggTilResept(Resept r) {
-    reseptliste.leggPaa(r);
-  }
-
-  public Stabel<Resept> hentReseptListe() {
-    return reseptliste;
-  }
-
-  public void skrivResepter() {
-    for (Resept r : reseptliste) {
-      System.out.println("Resept-ID: " + r.hentId() +
-      ", legemiddel: " + r.hentLegemiddel().hentNavn() + ".");
-    }
-  }
-
-  /*
-    Itererer gjennom listen over pasientens resepter og finner om noen
-    av dem gjelder narkotiske legemidler. Hvis tilfellet, returneres true.
-    @return true hvis pasienten har resept paa narkotiske legemidler
-  **/
-  public boolean harNark() {
-    for (Resept r : reseptliste) {
-      if (r.hentLegemiddel() instanceof Narkotisk) {
-        return true;
-      }
-    }
-    return false;
+  public String hentNavnOgFdn(){
+    return navn + "," + foedselsnr;
   }
 
   /*
