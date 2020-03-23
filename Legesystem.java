@@ -11,6 +11,11 @@ public class Legesystem {
 
   // main metoden
   public static void main(String[] args) throws Exception {
+    /*
+      vi har gaatt ut fra at innlesning fra fil ikke skal vaere noe man velger
+      aa gjoere fra en eller annen meny, men er noe som skjer idet systemet
+      starter opp.
+    */
     try {
       File fil = new File("myeInndata.txt");
       lesPasienter(fil);
@@ -34,8 +39,7 @@ public class Legesystem {
 
     // selve menyen tilbyr 8 ulike kommandoer og mulighet for aa avslutte
     while (!avslutte) {
-      System.out.println("HOVEDMENY");
-      System.out.println();
+      System.out.println("\nHOVEDMENY\n");
       System.out.println("0: Skriv ut oversikt");
       System.out.println("1: Opprett og legg til lege");
       System.out.println("2: Opprett og legg til pasient");
@@ -48,61 +52,36 @@ public class Legesystem {
 
       // hvert svaralternativ kaller paa metoder for tjenesten
       String svar = in.next().trim();
-      if (svar.equals("0")) skrivUtOversikt();
-      else if (svar.equals("1")) try {
-        leggTilLege();
+
+      try {
+        if (svar.equals("0")) skrivUtOversikt();
+        else if (svar.equals("1")) leggTilLege();
+        else if (svar.equals("2")) leggTilPasient();
+        else if (svar.equals("3")) leggTilResept();
+        else if (svar.equals("4")) leggTilLegemiddel();
+        else if (svar.equals("5")) brukResept();
+        else if (svar.equals("6")) skrivUtStatistikk();
+        else if (svar.equals("7")) skrivTilFil();
+        else if (svar.equals("8")) avslutte = true;
+        else {
+          System.out.println();
+          System.out.println("Ugyldig input! Proev igjen.");
+          Thread.sleep(1000);
+        }
       }
-      catch (NumberFormatException e) {
+      catch (IllegalArgumentException e) {
         System.out.println("\nUgyldig input!\n");
         Thread.sleep(1000);
       }
-      else if (svar.equals("2")) {
-        try {
-        leggTilPasient();
-        }
-        catch (IllegalArgumentException e) {
-          System.out.println("\nUgyldig input!\n");
-          Thread.sleep(1500);
-        }
-      }
-      else if (svar.equals("3")) {
-        try {
-          leggTilResept();
-        }
-        catch (UlovligUtskrift e) {
-          System.out.println("\n" + e + "\n");
-          Thread.sleep(1000);
-        }
-        catch (NumberFormatException e) {
-          System.out.println("\nUgyldig input!\n");
-          Thread.sleep(1000);
-        }
-      }
-      else if (svar.equals("4")) {
-        try {
-          leggTilLegemiddel();
-        }
-        catch (NumberFormatException e) {
-          System.out.println("\nUgyldig verdi.\n");
-          Thread.sleep(1000);
-        }
-      }
-      else if (svar.equals("5")) {
-        try {
-          brukResept();
-        }
-        catch (UgyldigListeIndeks e) {
-          System.out.println(e);
-        }
-      }
-      else if (svar.equals("6")) skrivUtStatistikk();
-      else if (svar.equals("7")) skrivTilFil();
-      else if (svar.equals("8")) avslutte = true;
-      else {
-        System.out.println();
-        System.out.println("Ugyldig input! Proev igjen.");
+      catch (UlovligUtskrift e) {
+        System.out.println("\n" + e + "\n");
         Thread.sleep(1000);
       }
+      catch (UgyldigListeIndeks e) {
+        System.out.println(e);
+        Thread.sleep(1000);
+      }
+
     }
     System.out.println("Programmet avsluttes.");
     Thread.sleep(2000);
@@ -529,13 +508,9 @@ public class Legesystem {
                   legemiddel = new Narkotisk(navn, pris, virkestoff, styrke);
                   legemiddelliste.leggTil(legemiddel);
                 }
-
-                else {System.out.println("Ugyldig dataformat! Kunne ikke lese linje " + nesteLinje); }
               }
 
-            } catch (IllegalArgumentException e) {
-              System.out.println("Ugyldig dataformat " + e.getMessage());
-            }
+            } catch (IllegalArgumentException e) {}
             nesteLinje = in.nextLine().split(",");
           }
         }
@@ -562,9 +537,7 @@ public class Legesystem {
                   legeliste.leggTil(lege);
                 }
                 nesteLinje = in.nextLine().split(",");
-              } catch (IndexOutOfBoundsException e) {
-                System.out.println("Ugyldig dataformat! Lege");
-            }
+              } catch (IndexOutOfBoundsException e) {}
           }
         }
       } catch (IndexOutOfBoundsException ie) {}
@@ -612,12 +585,8 @@ public class Legesystem {
               }
 
             }
-            catch (UgyldigListeIndeks e) {
-              System.out.println(e.getMessage());
-            }
-            catch (UlovligUtskrift e) {
-              System.out.println(e.getMessage());
-            }
+            catch (UgyldigListeIndeks e) {}
+            catch (UlovligUtskrift e) {}
 
             nesteLinje = in.nextLine().split(",");
           }
