@@ -626,8 +626,6 @@ public class Legesystem {
     }
   }
 
-
-  // HARALDS komm: denne kompilerer, men oppretter bare en blank fil
   // metode for aa skrive til fil
   static void skrivTilFil() {
     Scanner in = new Scanner(System.in);
@@ -660,8 +658,12 @@ public class Legesystem {
 
         utskrift = utskrift + "# Resepter (legemiddelNummer, legeNavn, pasientID, reit)\n";
         for (Resept r : reseptliste) {
-          utskrift = utskrift + r.hentLegemiddel().hentId() + r.hentLege().hentNavn() + r.hentPasientId() + r.hentReit() + "\n";
+          utskrift = utskrift + r.hentLegemiddel().hentId() + "," + r.hentLege().hentNavn() + "," + r.hentPasientId() + "," + r.hentReit() + "\n";
         }
+
+        //skriver hele strengen til utfila
+        utskriftWriter.printf(utskrift);
+
       } finally {
         utskriftWriter.close();
       }
