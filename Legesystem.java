@@ -587,6 +587,7 @@ public class Legesystem {
             }
             catch (UgyldigListeIndeks e) {}
             catch (UlovligUtskrift e) {}
+            catch (NullPointerException e) {}
 
             nesteLinje = in.nextLine().split(",");
           }
