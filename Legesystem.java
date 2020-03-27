@@ -587,7 +587,6 @@ public class Legesystem {
             }
             catch (UgyldigListeIndeks e) {}
             catch (UlovligUtskrift e) {}
-            catch (NullPointerException e) {}
 
             nesteLinje = in.nextLine().split(",");
           }
@@ -618,7 +617,7 @@ public class Legesystem {
 
         utskrift = utskrift + "# Legemidler (navn, type, pris, virkestoff [, styrke])\n";
         for (Legemiddel l : legemiddelliste) {
-          utskrift = utskrift + l.hentNavn() + "," + l.hentPris() + "," + l.hentVirkestoff() + "\n";
+          utskrift = utskrift + l.hentNavn() + "," + l.legemiddeltype() + "," + l.hentPris() + "," + l.hentVirkestoff() + "\n";
         }
 
         utskrift = utskrift + "# Leger (navn, kontrollid / 0 hvis vanlig lege)\n";
@@ -626,14 +625,11 @@ public class Legesystem {
           utskrift = utskrift + l.hentNavn() + "," + "0\n";
         }
 
-        utskrift = utskrift + "# Resepter (legemiddelNummer, legeNavn, pasientID, reit)\n";
+        utskrift = utskrift + "# Resepter (legemiddelNummer,legeNavn,pasientID,type,[reit])\n";
         for (Resept r : reseptliste) {
-          utskrift = utskrift + r.hentLegemiddel().hentId() + "," + r.hentLege().hentNavn() + "," + r.hentPasientId() + "," + r.hentReit() + "\n";
+          utskrift = utskrift + r.hentLegemiddel().hentId() + "," + r.hentLege().hentNavn() + "," + r.hentPasientId() + "," + r.hentType() + "," + r.hentReit() + "\n";
         }
-
-        //skriver hele strengen til utfila
-        utskriftWriter.printf(utskrift);
-
+        utskriftWriter.print(utskrift);
       } finally {
         utskriftWriter.close();
       }
@@ -642,4 +638,5 @@ public class Legesystem {
       skrivTilFil();
     }
   }
+
 }
